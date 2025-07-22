@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+
+{% block title %}{{ entry.title }} - DevWell{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <!-- Entry Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item"><a href="{{ url_for('journal.index') }}">Journal</a></li>
+                            <li class="breadcrumb-item active">Entry</li>
+                        </ol>
+                    </nav>
+                    <h1 class="h2 mb-1">{{ entry.title }}</h1>
+                    <div class="text-muted">
+                        <small class="me-3">
+                            <i class="far fa-calendar me-1"></i>
+                            {{ entry.created_at|format_datetime('full') }}
+                        </small>
+                        <span class="badge {% if entry.sentiment_label == 'positive' %}bg-success{% elif entry.sentiment_label == 'negative' %}bg-danger{% else %}bg-secondary{% endif %} bg-opacity-10">
+                            {{ entry.sentiment_label|title }}
+                        </span>
+                    </div>
+                </div>
+                <div class="dropdown">
+                    <button class="btn btn-outline-secondary rounded-circle" type="button" 
+                            data-bs-toggle="dropdown" aria-expanded="false" style="width: 38px; height: 38px;">
+                        <i class="fas fa-ellipsis-v"></i>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><a class="dropdown-item" href="{{ url_for('journal.edit_entry', entry_id=entry.id) }}">Edit</a></li>
+                        <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#deleteModal">Delete</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <!-- Entry Content -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body">
+                    <div class="entry-content">
+                        {{ entry.content|markdown|safe }}
+                    </div>
+                </div>
+                <div class="card-footer bg-transparent">
+                    <small class="text-muted">
+                        {{ entry.reading_time }} min read • 
+                        Updated {{ entry.updated_at|format_datetime('short') if entry.updated_at else entry.created_at|format_datetime('short') }}
+                    </small>
+                </div>
+            </div>
+            
+            <!-- Navigation -->
+            <div class="d-flex justify-content-between mb-5">
+                {% if prev_entry %}
+                <a href="{{ url_for('journal.view_entry', entry_id=prev_entry.id) }}" class="btn btn-outline-primary">
+                    <i class="fas fa-arrow-left me-1"></i> Previous
+                </a>
+                {% else %}
+                <span class="btn btn-outline-secondary disabled">
+                    <i class="fas fa-arrow-left me-1"></i> Previous
+                </span>
+                {% endif %}
+                
+                <a href="{{ url_for('journal.index') }}" class="btn btn-outline-secondary">
+                    <i class="fas fa-book me-1"></i> All Entries
+                </a>
+                
+                {% if next_entry %}
+                <a href="{{ url_for('journal.view_entry', entry_id=next_entry.id) }}" class="btn btn-outline-primary">
+                    Next <i class="fas fa-arrow-right ms-1"></i>
+                </a>
+                {% else %}
+                <span class="btn btn-outline-secondary disabled">
+                    Next <i class="fas fa-arrow-right ms-1"></i>
+                </span>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Delete Journal Entry</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete "{{ entry.title }}"?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form action="{{ url_for('journal.delete_entry', entry_id=entry.id) }}" method="POST">
+                    <button type="submit" class="btn btn-danger">Delete</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

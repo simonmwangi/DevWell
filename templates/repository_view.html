@@ -1,0 +1,331 @@
+{% extends "base.html" %}
+
+{% block title %}{{ repository.name }} - DevWell{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Repository Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{{ url_for('repository.index') }}">Repositories</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">{{ repository.name }}</li>
+                </ol>
+            </nav>
+            <h1 class="h3 mb-0">
+                <i class="fas fa-code-branch me-2"></i>{{ repository.name }}
+                {% if repository.description %}
+                    <small class="text-muted">{{ repository.description }}</small>
+                {% endif %}
+            </h1>
+        </div>
+        <div class="btn-group">
+            <a href="#" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#refreshRepo">
+                <i class="fas fa-sync-alt me-1"></i> Refresh
+            </a>
+            <a href="#" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteRepo">
+                <i class="fas fa-trash-alt me-1"></i> Delete
+            </a>
+        </div>
+    </div>
+    
+    <!-- Stats Cards -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-3">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-uppercase text-muted mb-1">Total Commits</h6>
+                            <h3 class="mb-0">{{ repository.commits.count() }}</h3>
+                        </div>
+                        <div class="bg-primary bg-opacity-10 p-3 rounded">
+                            <i class="fas fa-code-commit text-primary"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-uppercase text-muted mb-1">First Commit</h6>
+                            <h6 class="mb-0">
+                                {% if repository.commits.first() %}
+                                    {{ repository.commits.order_by(Commit.timestamp.asc()).first().timestamp|format_datetime('short') }}
+                                {% else %}
+                                    N/A
+                                {% endif %}
+                            </h6>
+                        </div>
+                        <div class="bg-success bg-opacity-10 p-3 rounded">
+                            <i class="fas fa-calendar-plus text-success"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-uppercase text-muted mb-1">Last Commit Date</h6>
+                            <h6 class="mb-0">{{ repository.last_commit_date|format_datetime('short') }}</h6>
+                        </div>
+                        <div class="bg-warning bg-opacity-10 p-3 rounded">
+                            <i class="fas fa-clock text-warning"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-uppercase text-muted mb-1">Repository URL</h6>
+                            <a href="{{ repository.repo_url }}" target="_blank" class="text-truncate d-block" style="max-width: 200px;">
+                                {{ repository.repo_url }}
+                            </a>
+                        </div>
+                        <div class="bg-info bg-opacity-10 p-3 rounded">
+                            <i class="fas fa-link text-info"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Tabs -->
+    <ul class="nav nav-tabs mb-4" id="repoTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="commits-tab" data-bs-toggle="tab" data-bs-target="#commits" 
+                    type="button" role="tab" aria-controls="commits" aria-selected="true">
+                <i class="fas fa-code-commit me-1"></i> Commits
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="activity-tab" data-bs-toggle="tab" data-bs-target="#activity" 
+                    type="button" role="tab" aria-controls="activity" aria-selected="false">
+                <i class="fas fa-chart-line me-1"></i> Activity
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="settings-tab" data-bs-toggle="tab" data-bs-target="#settings" 
+                    type="button" role="tab" aria-controls="settings" aria-selected="false">
+                <i class="fas fa-cog me-1"></i> Settings
+            </button>
+        </li>
+    </ul>
+    
+    <!-- Tab Content -->
+    <div class="tab-content" id="repoTabsContent">
+        <!-- Commits Tab -->
+        <div class="tab-pane fade show active" id="commits" role="tabpanel" aria-labelledby="commits-tab">
+            <div class="card">
+                <div class="card-body">
+                    {% if repository.commits.count() > 0 %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Message</th>
+                                        <th>Author</th>
+                                        <th>Date</th>
+                                        <th class="text-end">Changes</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for commit in repository.commits.order_by(Commit.timestamp.desc()).all() %}
+                                        <tr>
+                                            <td>
+                                                <a href="#" class="text-decoration-none">
+                                                    {{ commit.message|truncate(60) }}
+                                                </a>
+                                                <div class="text-muted small">
+                                                    {{ commit.commit_hash[:7] }}
+                                                </div>
+                                            </td>
+                                            <td>{{ commit.author_name }}</td>
+                                            <td>{{ commit.timestamp|format_datetime('short') }}</td>
+                                            <td class="text-end">
+                                                {% if commit.lines_added > 0 %}
+                                                    <span class="badge bg-success me-1">+{{ commit.lines_added }}</span>
+                                                {% endif %}
+                                                {% if commit.lines_removed > 0 %}
+                                                    <span class="badge bg-danger">-{{ commit.lines_removed }}</span>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-5">
+                            <div class="mb-3">
+                                <i class="fas fa-inbox fa-3x text-muted"></i>
+                            </div>
+                            <h5>No commits found</h5>
+                            <p class="text-muted">This repository doesn't have any commits yet or they haven't been analyzed.</p>
+                            <button class="btn btn-primary" onclick="window.location.reload()">
+                                <i class="fas fa-sync-alt me-1"></i> Refresh Data
+                            </button>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Activity Tab -->
+        <div class="tab-pane fade" id="activity" role="tabpanel" aria-labelledby="activity-tab">
+            <div class="card">
+                <div class="card-body">
+                    <div class="text-center py-5">
+                        <div class="mb-3">
+                            <i class="fas fa-chart-line fa-3x text-muted"></i>
+                        </div>
+                        <h5>Activity Analytics</h5>
+                        <p class="text-muted">Activity charts and metrics will be displayed here.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Settings Tab -->
+        <div class="tab-pane fade" id="settings" role="tabpanel" aria-labelledby="settings-tab">
+            <div class="card">
+                <div class="card-body">
+                    <form method="POST" action="{{ url_for('repository.edit_repository', repo_id=repository.id) }}">
+                        {{ form.hidden_tag() }}
+                        {{ form.repo_id(value=repository.id) }}
+                        
+                        <div class="mb-3">
+                            {{ form.name.label(class="form-label") }}
+                            {{ form.name(class="form-control", value=repository.name) }}
+                        </div>
+                        
+                        <div class="mb-3">
+                            {{ form.repo_url.label(class="form-label") }}
+                            {{ form.repo_url(class="form-control", value=repository.repo_url) }}
+                            <div class="form-text">
+                                <i class="fas fa-exclamation-triangle text-warning me-1"></i>
+                                Changing the repository URL will require re-analyzing the repository.
+                            </div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            {{ form.description.label(class="form-label") }}
+                            {{ form.description(class="form-control", rows=3) }}
+                        </div>
+                        
+                        <div class="d-flex justify-content-between">
+                            <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" 
+                                    data-bs-target="#deleteRepo">
+                                <i class="fas fa-trash-alt me-1"></i> Delete Repository
+                            </button>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-1"></i> Save Changes
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Refresh Modal -->
+<div class="modal fade" id="refreshRepo" tabindex="-1" aria-labelledby="refreshRepoLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="refreshRepoLabel">Refresh Repository Data</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>This will fetch the latest commits and update the repository data.</p>
+                <p class="text-muted small mb-0">
+                    <i class="fas fa-info-circle me-1"></i>
+                    This might take a few moments depending on the repository size.
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form action="{{ url_for('repository.refresh_repository', repo_id=repository.id) }}" method="POST">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-sync-alt me-1"></i> Refresh Now
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Modal -->
+<div class="modal fade" id="deleteRepo" tabindex="-1" aria-labelledby="deleteRepoLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title text-danger" id="deleteRepoLabel">
+                    <i class="fas fa-exclamation-triangle me-2"></i>Delete Repository
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete the repository "{{ repository.name }}"?</p>
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-circle me-2"></i>
+                    <strong>Warning:</strong> This action cannot be undone. All repository data will be permanently deleted.
+                </div>
+                <p class="mb-0">
+                    <i class="fas fa-info-circle me-1"></i>
+                    The local repository files will also be removed from the server.
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form action="{{ url_for('repository.delete_repository', repo_id=repository.id) }}" method="POST">
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-trash-alt me-1"></i> Delete Permanently
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Activate Bootstrap tooltips
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+    
+    // Handle tab persistence with URL hash
+    document.addEventListener('DOMContentLoaded', function() {
+        const hash = window.location.hash;
+        if (hash) {
+            const tab = new bootstrap.Tab(document.querySelector(`a[href="${hash}"]`));
+            tab.show();
+        }
+        
+        // Update URL when tab changes
+        const tabElms = document.querySelectorAll('button[data-bs-toggle="tab"]');
+        tabElms.forEach(tabEl => {
+            tabEl.addEventListener('click', function(e) {
+                const tabId = this.getAttribute('data-bs-target');
+                window.location.hash = tabId;
+            });
+        });
+    });
+</script>
+{% endblock %}

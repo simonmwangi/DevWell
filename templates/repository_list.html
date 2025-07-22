@@ -1,0 +1,173 @@
+{% extends "base.html" %}
+
+{% block title %}My Repositories - DevWell{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1><i class="fas fa-code-branch me-2"></i> My Repositories</h1>
+        <a href="{{ url_for('repository.add_repository') }}" class="btn btn-primary">
+            <i class="fas fa-plus me-1"></i> Add Repository
+        </a>
+    </div>
+    
+    {% if repositories %}
+        <div class="row g-4">
+            {% for repo in repositories %}
+                <div class="col-md-6 col-lg-4">
+                    <div class="card h-100 shadow-sm">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <h5 class="card-title mb-1">
+                                    <i class="fas fa-book me-2"></i>{{ repo.name }}
+                                </h5>
+                                <div class="dropdown">
+                                    <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" 
+                                            id="repoDropdown{{ repo.id }}" data-bs-toggle="dropdown" 
+                                            aria-expanded="false">
+                                        <i class="fas fa-ellipsis-v"></i>
+                                    </button>
+                                    <ul class="dropdown-menu" aria-labelledby="repoDropdown{{ repo.id }}">
+                                        <li>
+                                            <a class="dropdown-item" href="{{ url_for('repository.view_repository', repo_id=repo.id) }}">
+                                                <i class="fas fa-eye me-2"></i>View
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item" href="#" data-bs-toggle="modal" 
+                                               data-bs-target="#refreshRepo{{ repo.id }}">
+                                                <i class="fas fa-sync-alt me-2"></i>Refresh
+                                            </a>
+                                        </li>
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li>
+                                            <a class="dropdown-item text-danger" href="#" data-bs-toggle="modal" 
+                                               data-bs-target="#deleteRepo{{ repo.id }}">
+                                                <i class="fas fa-trash-alt me-2"></i>Delete
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                            
+                            {% if repo.description %}
+                                <p class="card-text text-muted mt-2">{{ repo.description }}</p>
+                            {% endif %}
+                            
+                            <div class="d-flex align-items-center text-muted small mt-3">
+                                <div class="me-3">
+                                    <i class="fas fa-code-commit me-1"></i>
+                                    {{ repo.commits.count() }} commits
+                                </div>
+                                <div>
+                                    <i class="far fa-calendar-alt me-1"></i>
+                                    Last updated {{ repo.last_commit_date|format_datetime('short') }}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-footer bg-transparent">
+                            <a href="{{ url_for('repository.view_repository', repo_id=repo.id) }}" 
+                               class="btn btn-sm btn-outline-primary">
+                                View Details
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Refresh Modal -->
+                <div class="modal fade" id="refreshRepo{{ repo.id }}" tabindex="-1" 
+                     aria-labelledby="refreshRepo{{ repo.id }}Label" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="refreshRepo{{ repo.id }}Label">Refresh Repository</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                Are you sure you want to refresh the repository data? This will fetch the latest commits.
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                <form action="{{ url_for('repository.refresh_repository', repo_id=repo.id) }}" method="POST">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-sync-alt me-1"></i> Refresh
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Delete Modal -->
+                <div class="modal fade" id="deleteRepo{{ repo.id }}" tabindex="-1" 
+                     aria-labelledby="deleteRepo{{ repo.id }}Label" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title text-danger" id="deleteRepo{{ repo.id }}Label">
+                                    <i class="fas fa-exclamation-triangle me-2"></i>Delete Repository
+                                </h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <p>Are you sure you want to delete the repository "{{ repo.name }}"?</p>
+                                <p class="text-danger mb-0">
+                                    <i class="fas fa-exclamation-circle me-1"></i>
+                                    This action cannot be undone. All repository data will be permanently deleted.
+                                </p>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                <form action="{{ url_for('repository.delete_repository', repo_id=repo.id) }}" method="POST">
+                                    <button type="submit" class="btn btn-danger">
+                                        <i class="fas fa-trash-alt me-1"></i> Delete Permanently
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="text-center py-5 my-5">
+            <div class="mb-4">
+                <i class="fas fa-code-branch fa-4x text-muted"></i>
+            </div>
+            <h3 class="h4 text-muted mb-3">No repositories found</h3>
+            <p class="text-muted mb-4">
+                You haven't added any Git repositories yet. Add your first repository to start tracking your development activity.
+            </p>
+            <a href="{{ url_for('repository.add_repository') }}" class="btn btn-primary">
+                <i class="fas fa-plus me-1"></i> Add Your First Repository
+            </a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .card {
+        transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        border: 1px solid rgba(0, 0, 0, 0.05);
+    }
+    
+    .card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1) !important;
+    }
+    
+    .dropdown-toggle::after {
+        display: none;
+    }
+    
+    .card-title {
+        font-weight: 600;
+    }
+    
+    .card-footer {
+        border-top: 1px solid rgba(0, 0, 0, 0.05);
+    }
+</style>
+{% endblock %}

@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+
+{% block title %}{% if form.repo_id.data %}Edit{% else %}Add{% endif %} Repository - DevWell{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header">
+                    <h2 class="h4 mb-0">
+                        <i class="fas fa-code-branch me-2"></i>
+                        {% if form.repo_id.data %}Edit{% else %}Add New{% endif %} Repository
+                    </h2>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="{% if form.repo_id.data %}{{ url_for('repository.edit_repository', repo_id=form.repo_id.data) }}{% else %}{{ url_for('repository.add_repository') }}{% endif %}" novalidate>
+                        {{ form.hidden_tag() }}
+                        
+                        <div class="mb-3">
+                            {{ form.name.label(class="form-label") }}
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-tag"></i></span>
+                                {{ form.name(class="form-control", placeholder="Repository Name") }}
+                            </div>
+                            {% if form.name.errors %}
+                                <div class="text-danger small mt-1">
+                                    {% for error in form.name.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            {{ form.repo_url.label(class="form-label") }}
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fab fa-github"></i></span>
+                                {{ form.repo_url(class="form-control", placeholder="https://github.com/username/repository.git") }}
+                            </div>
+                            <div class="form-text">HTTPS or SSH URL of your Git repository</div>
+                            {% if form.repo_url.errors %}
+                                <div class="text-danger small mt-1">
+                                    {% for error in form.repo_url.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-4">
+                            {{ form.description.label(class="form-label") }}
+                            {{ form.description(class="form-control", rows=3, placeholder="Optional: Add a brief description about this repository") }}
+                            {% if form.description.errors %}
+                                <div class="text-danger small mt-1">
+                                    {% for error in form.description.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a href="{{ url_for('repository.index') }}" class="btn btn-outline-secondary me-md-2">
+                                <i class="fas fa-arrow-left me-1"></i> Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-1"></i>
+                                {% if form.repo_id.data %}Update{% else %}Add{% endif %} Repository
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .form-label {
+        font-weight: 500;
+    }
+    .card-header {
+        background-color: #f8f9fa;
+        border-bottom: 1px solid rgba(0,0,0,.125);
+    }
+</style>
+{% endblock %}

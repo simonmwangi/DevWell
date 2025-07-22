@@ -1,0 +1,14 @@
+Flask
+Flask-SQLAlchemy
+Flask-Login
+Flask-WTF
+GitPython
+transformers
+torch
+nltk
+textblob
+pandas
+plotly
+scikit-learn
+bcrypt
+python-dotenv

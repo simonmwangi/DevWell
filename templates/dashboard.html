@@ -1,0 +1,364 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - DevWell{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Welcome Banner -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card bg-primary text-white">
+                <div class="card-body py-4">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h2 class="h4 mb-1">Welcome back, {{ current_user.username }}!</h2>
+                            <p class="mb-0">Here's what's happening with your developer wellness today.</p>
+                        </div>
+                        <div class="d-none d-md-block">
+                            <i class="fas fa-code fa-3x opacity-25"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="row mb-4">
+        <div class="col-md-4 mb-3 mb-md-0">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-uppercase text-muted mb-2">Journal Entries</h6>
+                            <h3 class="mb-0">{{ stats.total_journals }}</h3>
+                        </div>
+                        <div class="bg-primary bg-opacity-10 p-3 rounded-circle">
+                            <i class="fas fa-book text-primary fa-lg"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer bg-transparent border-top-0 pt-0">
+                    <a href="{{ url_for('journal.index') }}" class="btn btn-sm btn-link ps-0">
+                        View all entries <i class="fas fa-arrow-right ms-1"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4 mb-3 mb-md-0">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-uppercase text-muted mb-2">Repositories</h6>
+                            <h3 class="mb-0">{{ stats.total_repos }}</h3>
+                        </div>
+                        <div class="bg-success bg-opacity-10 p-3 rounded-circle">
+                            <i class="fab fa-github text-success fa-lg"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer bg-transparent border-top-0 pt-0">
+                    <a href="{{ url_for('repository.index') }}" class="btn btn-sm btn-link ps-0">
+                        View repositories <i class="fas fa-arrow-right ms-1"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-uppercase text-muted mb-2">Wellness Score</h6>
+                            <div class="d-flex align-items-center">
+                                <h3 class="mb-0 me-2">8.2</h3>
+                                <span class="badge bg-success">Good <i class="fas fa-arrow-up ms-1"></i></span>
+                            </div>
+                        </div>
+                        <div class="bg-warning bg-opacity-10 p-3 rounded-circle">
+                            <i class="fas fa-heart text-warning fa-lg"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer bg-transparent border-top-0 pt-0">
+                    <a href="#" class="btn btn-sm btn-link ps-0">
+                        View insights <i class="fas fa-arrow-right ms-1"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Recent Journal Entries -->
+        <div class="col-lg-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Recent Journal Entries</h5>
+                    <a href="{{ url_for('journal.new_entry') }}" class="btn btn-sm btn-outline-primary">
+                        <i class="fas fa-plus me-1"></i> New Entry
+                    </a>
+                </div>
+                <div class="card-body p-0">
+                    {% if recent_entries %}
+                        <div class="list-group list-group-flush">
+                            {% for entry in recent_entries %}
+                            <a href="{{ url_for('journal.view_entry', entry_id=entry.id) }}" 
+                               class="list-group-item list-group-item-action border-0 py-3">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h6 class="mb-1">{{ entry.title }}</h6>
+                                    <small class="text-muted">{{ entry.created_at|format_datetime('short') }}</small>
+                                </div>
+                                <p class="mb-1 text-muted">{{ entry.content|truncate(100) }}</p>
+                                <div>
+                                    {% if entry.sentiment_label == 'positive' %}
+                                        <span class="badge bg-success bg-opacity-10 text-success">
+                                            <i class="fas fa-smile me-1"></i> Positive
+                                        </span>
+                                    {% elif entry.sentiment_label == 'negative' %}
+                                        <span class="badge bg-danger bg-opacity-10 text-danger">
+                                            <i class="fas fa-frown me-1"></i> Negative
+                                        </span>
+                                    {% else %}
+                                        <span class="badge bg-secondary bg-opacity-10 text-secondary">
+                                            <i class="fas fa-meh me-1"></i> Neutral
+                                        </span>
+                                    {% endif %}
+                                </div>
+                            </a>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-5">
+                            <div class="mb-3">
+                                <i class="fas fa-book fa-3x text-muted"></i>
+                            </div>
+                            <h5 class="text-muted">No journal entries yet</h5>
+                            <p class="text-muted">Start journaling to track your developer wellness journey</p>
+                            <a href="{{ url_for('journal.new_entry') }}" class="btn btn-primary">
+                                <i class="fas fa-plus me-1"></i> Create First Entry
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+                {% if recent_entries %}
+                <div class="card-footer bg-white border-top-0 pt-0">
+                    <a href="{{ url_for('journal.index') }}" class="btn btn-sm btn-link ps-0">
+                        View all entries <i class="fas fa-arrow-right ms-1"></i>
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Repository Activity -->
+        <div class="col-lg-6">
+            <div class="card h-100">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Recent Repository Activity</h5>
+                    <a href="{{ url_for('repository.index') }}" class="btn btn-sm btn-outline-primary">
+                        <i class="fas fa-plus me-1"></i> Add Repository
+                    </a>
+                </div>
+                <div class="card-body p-0">
+                    {% if recent_repos %}
+                        <div class="list-group list-group-flush">
+                            {% for repo in recent_repos %}
+                            <div class="list-group-item border-0 py-3">
+                                <div class="d-flex align-items-center mb-2">
+                                    <i class="fab fa-github fa-lg me-2 text-muted"></i>
+                                    <h6 class="mb-0">{{ repo.name }}</h6>
+                                    <span class="badge bg-light text-dark ms-2">
+                                        {{ 'Active' if repo.last_analyzed else 'Inactive' }}
+                                    </span>
+                                </div>
+                                <p class="small text-muted mb-2">
+                                    {{ repo.description or 'No description available' }}
+                                </p>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <small class="text-muted">
+                                        {% if repo.last_analyzed %}
+                                            Last analyzed: {{ repo.last_analyzed|format_datetime('short') }}
+                                        {% else %}
+                                            Never analyzed
+                                        {% endif %}
+                                    </small>
+                                    <a href="{{ url_for('repository.view_repository', repo_id=repo.id) }}" 
+                                       class="btn btn-sm btn-outline-secondary">
+                                        View
+                                    </a>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-5">
+                            <div class="mb-3">
+                                <i class="fab fa-github fa-3x text-muted"></i>
+                            </div>
+                            <h5 class="text-muted">No repositories added yet</h5>
+                            <p class="text-muted">Connect your Git repositories to track your development activity</p>
+                            <a href="{{ url_for('repository.add_repository') }}" class="btn btn-primary">
+                                <i class="fas fa-plus me-1"></i> Add Repository
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+                {% if recent_repos %}
+                <div class="card-footer bg-white border-top-0 pt-0">
+                    <a href="{{ url_for('repository.index') }}" class="btn btn-sm btn-link ps-0">
+                        View all repositories <i class="fas fa-arrow-right ms-1"></i>
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Wellness Insights -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">Wellness Insights</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="text-uppercase text-muted mb-3">Daily Recommendations</h6>
+                            <div class="list-group list-group-flush">
+                                <div class="list-group-item border-0 px-0">
+                                    <div class="d-flex align-items-center">
+                                        <div class="bg-primary bg-opacity-10 p-2 rounded-circle me-3">
+                                            <i class="fas fa-walking text-primary"></i>
+                                        </div>
+                                        <div>
+                                            <p class="mb-0">Take a 5-minute walk outside</p>
+                                            <small class="text-muted">Helps reduce eye strain and improve focus</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="list-group-item border-0 px-0">
+                                    <div class="d-flex align-items-center">
+                                        <div class="bg-success bg-opacity-10 p-2 rounded-circle me-3">
+                                            <i class="fas fa-water text-success"></i>
+                                        </div>
+                                        <div>
+                                            <p class="mb-0">Drink some water</p>
+                                            <small class="text-muted">Staying hydrated improves cognitive function</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="list-group-item border-0 px-0">
+                                    <div class="d-flex align-items-center">
+                                        <div class="bg-warning bg-opacity-10 p-2 rounded-circle me-3">
+                                            <i class="fas fa-moon text-warning"></i>
+                                        </div>
+                                        <div>
+                                            <p class="mb-0">Plan your next break</p>
+                                            <small class="text-muted">Regular breaks improve productivity</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-uppercase text-muted mb-3">Activity Summary</h6>
+                            <div class="row text-center">
+                                <div class="col-4">
+                                    <div class="p-3 rounded-3 bg-light">
+                                        <h3 class="mb-0">4.5</h3>
+                                        <small class="text-muted">Avg. Focus Hours</small>
+                                    </div>
+                                </div>
+                                <div class="col-4">
+                                    <div class="p-3 rounded-3 bg-light">
+                                        <h3 class="mb-0">87%</h3>
+                                        <small class="text-muted">Productivity</small>
+                                    </div>
+                                </div>
+                                <div class="col-4">
+                                    <div class="p-3 rounded-3 bg-light">
+                                        <h3 class="mb-0">6.8</h3>
+                                        <small class="text-muted">Wellness Score</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mt-4">
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span>Work-Life Balance</span>
+                                    <span>72%</span>
+                                </div>
+                                <div class="progress" style="height: 8px;">
+                                    <div class="progress-bar bg-success" role="progressbar" style="width: 72%;" 
+                                         aria-valuenow="72" aria-valuemin="0" aria-valuemax="100"></div>
+                                </div>
+                                <div class="d-flex justify-content-between mt-3 mb-2">
+                                    <span>Code Quality</span>
+                                    <span>85%</span>
+                                </div>
+                                <div class="progress" style="height: 8px;">
+                                    <div class="progress-bar bg-info" role="progressbar" style="width: 85%;" 
+                                         aria-valuenow="85" aria-valuemin="0" aria-valuemax="100"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer bg-white border-top-0 pt-0 text-end">
+                    <a href="#" class="btn btn-sm btn-link">
+                        View detailed insights <i class="fas fa-arrow-right ms-1"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .card {
+        border: none;
+        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+        transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+    }
+    .card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1);
+    }
+    .progress {
+        border-radius: 10px;
+    }
+    .progress-bar {
+        border-radius: 10px;
+    }
+    .list-group-item {
+        transition: background-color 0.2s ease-in-out;
+    }
+    .list-group-item:hover {
+        background-color: #f8f9fa;
+    }
+    .bg-primary {
+        background-color: #4e73df !important;
+    }
+    .text-primary {
+        color: #4e73df !important;
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Initialize tooltips
+    document.addEventListener('DOMContentLoaded', function() {
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+    });
+</script>
+{% endblock %}

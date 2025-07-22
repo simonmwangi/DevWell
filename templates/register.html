@@ -1,0 +1,163 @@
+{% extends "base.html" %}
+
+{% block title %}Register - DevWell{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-7">
+        <div class="card shadow">
+            <div class="card-body p-4 p-md-5">
+                <h2 class="card-title text-center mb-4">Create Your Account</h2>
+                <p class="text-center text-muted mb-4">Join DevWell and start tracking your developer wellness journey</p>
+                
+                <form method="POST" action="{{ url_for('auth.register') }}" novalidate>
+                    {{ form.hidden_tag() }}
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            {{ form.username.label(class="form-label") }}
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-user"></i></span>
+                                {{ form.username(class="form-control", placeholder="Choose a username") }}
+                            </div>
+                            <div class="form-text">This will be your unique identifier on DevWell</div>
+                            {% if form.username.errors %}
+                                <div class="text-danger small mt-1">
+                                    {% for error in form.username.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            {{ form.email.label(class="form-label") }}
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-envelope"></i></span>
+                                {{ form.email(class="form-control", placeholder="your@email.com") }}
+                            </div>
+                            {% if form.email.errors %}
+                                <div class="text-danger small mt-1">
+                                    {% for error in form.email.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            {{ form.password.label(class="form-label") }}
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                                {{ form.password(class="form-control", placeholder="Create a password") }}
+                            </div>
+                            <div class="form-text">At least 8 characters, with 1 number</div>
+                            {% if form.password.errors %}
+                                <div class="text-danger small mt-1">
+                                    {% for error in form.password.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-6 mb-4">
+                            {{ form.confirm_password.label(class="form-label") }}
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                                {{ form.confirm_password(class="form-control", placeholder="Confirm your password") }}
+                            </div>
+                            {% if form.confirm_password.errors %}
+                                <div class="text-danger small mt-1">
+                                    {% for error in form.confirm_password.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="form-check mb-4">
+                        {{ form.terms(class="form-check-input") }}
+                        <label class="form-check-label" for="terms">
+                            I agree to the <a href="#" class="text-decoration-none">Terms of Service</a> and 
+                            <a href="#" class="text-decoration-none">Privacy Policy</a>
+                        </label>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary w-100 py-2 mb-3">
+                        Create Account
+                    </button>
+                    
+                    <div class="text-center mt-4">
+                        <p class="mb-0">Already have an account? 
+                            <a href="{{ url_for('auth.login') }}" class="text-decoration-none">
+                                Sign in
+                            </a>
+                        </p>
+                    </div>
+                </form>
+                
+                <div class="position-relative my-4">
+                    <div class="border-bottom"></div>
+                    <div class="position-absolute top-50 start-50 translate-middle bg-white px-3">
+                        <span class="text-muted small">Or sign up with</span>
+                    </div>
+                </div>
+                
+                <div class="d-grid gap-2">
+                    <a href="#" class="btn btn-outline-dark">
+                        <i class="fab fa-github me-2"></i> GitHub
+                    </a>
+                    <a href="#" class="btn btn-outline-primary">
+                        <i class="fab fa-google me-2"></i> Google
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    body {
+        background-color: #f8f9fa;
+    }
+    .card {
+        border: none;
+        border-radius: 10px;
+    }
+    .form-control:focus {
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.15);
+        border-color: #86b7fe;
+    }
+    .btn-primary {
+        padding: 0.5rem 1.5rem;
+    }
+    .input-group-text {
+        background-color: #f8f9fa;
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Password match validation
+    const password = document.getElementById('password');
+    const confirm_password = document.getElementById('confirm_password');
+    
+    function validatePassword() {
+        if (password.value !== confirm_password.value) {
+            confirm_password.setCustomValidity("Passwords don't match");
+        } else {
+            confirm_password.setCustomValidity('');
+        }
+    }
+    
+    password.onchange = validatePassword;
+    confirm_password.onkeyup = validatePassword;
+</script>
+{% endblock %}
