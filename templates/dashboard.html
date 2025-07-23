@@ -53,15 +53,16 @@
                         <div>
                             <h6 class="text-uppercase text-muted mb-2">Repositories</h6>
                             <h3 class="mb-0">{{ stats.total_repos }}</h3>
+                            <p class="text-muted small mb-0">{{ stats.total_commits }} commits by {{ stats.total_authors }} authors</p>
                         </div>
                         <div class="bg-success bg-opacity-10 p-3 rounded-circle">
-                            <i class="fab fa-github text-success fa-lg"></i>
+                            <i class="fas fa-code-branch text-success fa-lg"></i>
                         </div>
                     </div>
                 </div>
                 <div class="card-footer bg-transparent border-top-0 pt-0">
                     <a href="{{ url_for('repository.index') }}" class="btn btn-sm btn-link ps-0">
-                        View repositories <i class="fas fa-arrow-right ms-1"></i>
+                        Manage repositories <i class="fas fa-arrow-right ms-1"></i>
                     </a>
                 </div>
             </div>
@@ -214,6 +215,102 @@
                     </a>
                 </div>
                 {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Repository Health -->
+    {% if stats.risky_repos %}
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card border-warning">
+                <div class="card-header bg-warning bg-opacity-10 d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="fas fa-exclamation-triangle text-warning me-2"></i> Repository Health Alerts</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Repository</th>
+                                    <th>Burnout Risk</th>
+                                    <th>Last Analyzed</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for repo in stats.risky_repos %}
+                                <tr>
+                                    <td class="align-middle">
+                                        <i class="fas fa-code-branch text-muted me-2"></i>
+                                        {{ repo.name }}
+                                    </td>
+                                    <td class="align-middle">
+                                        <div class="progress" style="height: 20px;">
+                                            <div class="progress-bar bg-{{ 'danger' if repo.risk_score > 70 else 'warning' }}" 
+                                                 role="progressbar" 
+                                                 style="width: {{ repo.risk_score }}%" 
+                                                 aria-valuenow="{{ repo.risk_score }}" 
+                                                 aria-valuemin="0" 
+                                                 aria-valuemax="100">
+                                                {{ repo.risk_score }}%
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="align-middle">{{ repo.last_analyzed }}</td>
+                                    <td class="align-middle">
+                                        <a href="{{ url_for('repository.view_repository', repo_id=repo.id) }}" 
+                                           class="btn btn-sm btn-outline-primary">
+                                            View Details
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Recent Activity -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Recent Activity</h5>
+                </div>
+                <div class="card-body p-0">
+                    {% if stats.recent_activity %}
+                    <div class="list-group list-group-flush">
+                        {% for activity in stats.recent_activity %}
+                        <div class="list-group-item border-0">
+                            <div class="d-flex align-items-center">
+                                <div class="flex-shrink-0">
+                                    <div class="bg-light rounded-circle p-2 me-3">
+                                        <i class="fas fa-{{ 'code-commit' if activity.type == 'commit' else 'edit' }} text-primary"></i>
+                                    </div>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <div class="d-flex justify-content-between">
+                                        <h6 class="mb-1">{{ activity.message }}</h6>
+                                        <small class="text-muted">{{ activity.timestamp.strftime('%b %d, %H:%M') }}</small>
+                                    </div>
+                                    <p class="mb-0 text-muted small">{{ activity.repo }}</p>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="text-center p-4">
+                        <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+                        <p class="text-muted mb-0">No recent activity found</p>
+                    </div>
+                    {% endif %}
+                </div>
             </div>
         </div>
     </div>

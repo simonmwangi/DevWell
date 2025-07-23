@@ -184,18 +184,123 @@
         </div>
         
         <!-- Activity Tab -->
-        <div class="tab-pane fade" id="activity" role="tabpanel" aria-labelledby="activity-tab">
-            <div class="card">
-                <div class="card-body">
-                    <div class="text-center py-5">
-                        <div class="mb-3">
-                            <i class="fas fa-chart-line fa-3x text-muted"></i>
+        <div class="tab-pane fade show active" id="activity" role="tabpanel" aria-labelledby="activity-tab">
+            {% if not analysis %}
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle me-2"></i>
+                No analysis data available. Click the "Analyze" button to generate repository insights.
+            </div>
+            {% else %}
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <div class="card h-100">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0">Commit Activity by Hour</h5>
                         </div>
-                        <h5>Activity Analytics</h5>
-                        <p class="text-muted">Activity charts and metrics will be displayed here.</p>
+                        <div class="card-body">
+                            <canvas id="commitHoursChart" height="250"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card h-100">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0">Commit Activity by Day</h5>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="commitDaysChart" height="250"></canvas>
+                        </div>
                     </div>
                 </div>
             </div>
+
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <div class="card h-100">
+                        <div class="card-header">
+                            <h5 class="mb-0">Commit Sentiment</h5>
+                        </div>
+                        <div class="card-body text-center">
+                            <div class="d-flex justify-content-center mb-3">
+                                <div style="width: 200px; height: 200px;">
+                                    <canvas id="sentimentChart"></canvas>
+                                </div>
+                            </div>
+                            <div class="text-muted small">
+                                Based on analysis of {{ analysis.commit_patterns.total_commits if analysis.commit_patterns else 0 }} commit messages
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card h-100">
+                        <div class="card-header">
+                            <h5 class="mb-0">Burnout Risk Assessment</h5>
+                        </div>
+                        <div class="card-body">
+                            {% if chart_data.burnout_metrics %}
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between mb-1">
+                                    <span>Burnout Risk</span>
+                                    <span>{{ "%0.0f"|format(chart_data.burnout_metrics.risk_score) }}%</span>
+                                </div>
+                                <div class="progress" style="height: 20px;">
+                                    {% set risk_class = 'bg-danger' if chart_data.burnout_metrics.risk_score > 70 else 
+                                                     'bg-warning' if chart_data.burnout_metrics.risk_score > 30 else 'bg-success' %}
+                                    <div class="progress-bar {{ risk_class }}" role="progressbar" 
+                                         style="width: {{ chart_data.burnout_metrics.risk_score }}%" 
+                                         aria-valuenow="{{ chart_data.burnout_metrics.risk_score }}" 
+                                         aria-valuemin="0" 
+                                         aria-valuemax="100">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row small text-muted">
+                                <div class="col-6 mb-2">
+                                    <i class="fas fa-moon me-1"></i> Late Night Commits:
+                                    <span class="float-end fw-bold">{{ chart_data.burnout_metrics.late_night }}</span>
+                                </div>
+                                <div class="col-6 mb-2">
+                                    <i class="fas fa-calendar-weekend me-1"></i> Weekend Commits:
+                                    <span class="float-end fw-bold">{{ chart_data.burnout_metrics.weekend }}</span>
+                                </div>
+                                <div class="col-6">
+                                    <i class="fas fa-comment-alt me-1"></i> Message Quality:
+                                    <span class="float-end fw-bold">{{ "%0.0f"|format(chart_data.burnout_metrics.message_quality) }}%</span>
+                                </div>
+                                <div class="col-6">
+                                    <i class="fas fa-bolt me-1"></i> Recent Activity:
+                                    <span class="float-end fw-bold">{{ chart_data.burnout_metrics.recent_frequency }}/day</span>
+                                </div>
+                            </div>
+                            {% else %}
+                            <div class="text-center text-muted py-4">
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                Not enough data for burnout analysis
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            {% if analysis.sentiment_analysis %}
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Sentiment Trends</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="sentimentTrendChart" height="100"></canvas>
+                </div>
+            </div>
+            {% endif %}
+            
+            {% if last_analyzed %}
+            <div class="text-end text-muted small">
+                <i class="fas fa-clock me-1"></i> Last analyzed: {{ last_analyzed.strftime('%Y-%m-%d %H:%M') }}
+            </div>
+            {% endif %}
+            {% endif %}
         </div>
         
         <!-- Settings Tab -->
@@ -259,10 +364,11 @@
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                 <form action="{{ url_for('repository.refresh_repository', repo_id=repository.id) }}" method="POST">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     <button type="submit" class="btn btn-primary">
                         <i class="fas fa-sync-alt me-1"></i> Refresh Now
                     </button>
-                </form>
+                </form>                
             </div>
         </div>
     </div>
@@ -292,6 +398,7 @@
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                 <form action="{{ url_for('repository.delete_repository', repo_id=repository.id) }}" method="POST">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     <button type="submit" class="btn btn-danger">
                         <i class="fas fa-trash-alt me-1"></i> Delete Permanently
                     </button>
@@ -303,6 +410,9 @@
 {% endblock %}
 
 {% block extra_js %}
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 <script>
     // Activate Bootstrap tooltips
     var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
@@ -326,6 +436,181 @@
                 window.location.hash = tabId;
             });
         });
+
+        // Initialize charts if we're on the activity tab
+        if (document.getElementById('activity').classList.contains('active')) {
+            initializeCharts();
+        } else {
+            // Initialize charts when activity tab is shown
+            const activityTab = document.getElementById('activity-tab');
+            if (activityTab) {
+                activityTab.addEventListener('shown.bs.tab', function() {
+                    initializeCharts();
+                });
+            }
+        }
     });
+
+    function initializeCharts() {
+        {% if analysis %}
+        // Commit Hours Chart
+        const hoursCtx = document.getElementById('commitHoursChart');
+        if (hoursCtx) {
+            new Chart(hoursCtx, {
+                type: 'bar',
+                data: {
+                    labels: Array.from({length: 24}, (_, i) => i + ':00'),
+                    datasets: [{
+                        label: 'Commits',
+                        data: {{ chart_data.commit_hours|default([])|tojson|safe }},
+                        backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                precision: 0
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Commit Days Chart
+        const daysCtx = document.getElementById('commitDaysChart');
+        if (daysCtx) {
+            new Chart(daysCtx, {
+                type: 'bar',
+                data: {
+                    labels: {{ chart_data.day_labels|default(['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'])|tojson|safe }},
+                    datasets: [{
+                        label: 'Commits',
+                        data: {{ chart_data.commit_days|default([0,0,0,0,0,0,0])|tojson|safe }},
+                        backgroundColor: 'rgba(75, 192, 192, 0.5)',
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                precision: 0
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Sentiment Doughnut Chart
+        const sentimentCtx = document.getElementById('sentimentChart');
+        if (sentimentCtx && {{ chart_data.sentiment_data is defined|tojson|safe }}) {
+            new Chart(sentimentCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Positive', 'Neutral', 'Negative'],
+                    datasets: [{
+                        data: [
+                            {{ chart_data.sentiment_data.positive|default(0) }}, 
+                            {{ chart_data.sentiment_data.neutral|default(0) }}, 
+                            {{ chart_data.sentiment_data.negative|default(0) }}
+                        ],
+                        backgroundColor: [
+                            'rgba(75, 192, 192, 0.6)',
+                            'rgba(201, 203, 207, 0.6)',
+                            'rgba(255, 99, 132, 0.6)'
+                        ],
+                        borderColor: [
+                            'rgba(75, 192, 192, 1)',
+                            'rgba(201, 203, 207, 1)',
+                            'rgba(255, 99, 132, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Sentiment Trend Chart
+        const trendCtx = document.getElementById('sentimentTrendChart');
+        {% if analysis.sentiment_analysis is defined and analysis.sentiment_analysis.sentiment_trend and analysis.sentiment_analysis.sentiment_trend|length > 0 %}
+        if (trendCtx) {
+            
+            new Chart(trendCtx, {
+                type: 'line',
+                data: {
+                    labels: Array({{ analysis.sentiment_analysis.sentiment_trend|length }}).fill(''),
+                    datasets: [{
+                        label: 'Sentiment Trend',
+                        data: {{ analysis.sentiment_analysis.sentiment_trend|tojson|safe }},
+                        fill: false,
+                        borderColor: 'rgb(75, 192, 192)',
+                        tension: 0.1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            min: -1,
+                            max: 1,
+                            ticks: {
+                                callback: function(value) {
+                                    if (value === 1) return 'Positive';
+                                    if (value === 0) return 'Neutral';
+                                    if (value === -1) return 'Negative';
+                                    return '';
+                                }
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const value = context.parsed.y;
+                                    if (value > 0.3) return 'Positive';
+                                    if (value < -0.3) return 'Negative';
+                                    return 'Neutral';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        {% endif %}
+        {% endif %}
+    }
 </script>
 {% endblock %}

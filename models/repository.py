@@ -9,9 +9,18 @@ class Repository(db.Model):
     description = db.Column(db.Text)
     repo_url = db.Column(db.String(500), nullable=False)
     local_path = db.Column(db.String(500))
-    last_analyzed = db.Column(db.DateTime)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     last_commit_date = db.Column(db.DateTime)
+    
+    # Analysis fields
+    last_analyzed = db.Column(db.DateTime)
+    analysis_summary = db.Column(db.Text)  # Stores JSON string of analysis results
+    commit_frequency = db.Column(db.Float)  # Commits per day
+    avg_sentiment = db.Column(db.Float)    # Average sentiment score (-1 to 1)
+    burnout_risk = db.Column(db.Float)      # 0-1 scale
+    total_commits = db.Column(db.Integer)   # Total number of commits
+    total_authors = db.Column(db.Integer)   # Number of unique authors
+    last_analysis_status = db.Column(db.String(20))  # 'pending', 'completed', 'failed'
     
     # Foreign Keys
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)

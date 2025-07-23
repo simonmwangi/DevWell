@@ -39,6 +39,12 @@
                                                 <i class="fas fa-sync-alt me-2"></i>Refresh
                                             </a>
                                         </li>
+                                        <li>
+                                            <a class="dropdown-item analyze-repo" href="#" 
+                                               data-repo-id="{{ repo.id }}">
+                                                <i class="fas fa-chart-line me-2"></i>Analyze
+                                            </a>
+                                        </li>
                                         <li><hr class="dropdown-divider"></li>
                                         <li>
                                             <a class="dropdown-item text-danger" href="#" data-bs-toggle="modal" 
@@ -144,6 +150,82 @@
         </div>
     {% endif %}
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Handle analyze button clicks
+        document.querySelectorAll('.analyze-repo').forEach(button => {
+            button.addEventListener('click', function(e) {
+                e.preventDefault();
+                const repoId = this.getAttribute('data-repo-id');
+                analyzeRepository(repoId);
+            });
+        });
+        
+        // Function to analyze repository
+        async function analyzeRepository(repoId) {
+            const button = document.querySelector(`.analyze-repo[data-repo-id="${repoId}"]`);
+            const originalHtml = button.innerHTML;
+            
+            try {
+                // Show loading state
+                button.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Analyzing...';
+                button.classList.add('disabled');
+                
+                // Call the analyze endpoint
+                const response = await fetch(`/repository/${repoId}/analyze`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    },
+                    credentials: 'same-origin'
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    // Show success message
+                    showAlert('Repository analysis completed successfully!', 'success');
+                    // Reload the page to show updated analysis
+                    setTimeout(() => window.location.reload(), 1500);
+                } else {
+                    throw new Error(result.error || 'Failed to analyze repository');
+                }
+            } catch (error) {
+                console.error('Error analyzing repository:', error);
+                showAlert(error.message || 'Failed to analyze repository', 'danger');
+            } finally {
+                // Reset button state
+                button.innerHTML = originalHtml;
+                button.classList.remove('disabled');
+            }
+        }
+        
+        // Helper function to show alerts
+        function showAlert(message, type = 'info') {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type} alert-dismissible fade show position-fixed top-0 end-0 m-3`;
+            alertDiv.role = 'alert';
+            alertDiv.style.zIndex = '1050';
+            alertDiv.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            `;
+            
+            document.body.appendChild(alertDiv);
+            
+            // Auto-dismiss after 5 seconds
+            setTimeout(() => {
+                const bsAlert = new bootstrap.Alert(alertDiv);
+                bsAlert.close();
+            }, 5000);
+        }
+    });
+</script>
 {% endblock %}
 
 {% block extra_css %}

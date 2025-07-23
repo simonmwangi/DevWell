@@ -1,14 +1,15 @@
 from flask import Flask
+from flask_wtf import CSRFProtect
 import os
 from config import Config
-from extensions import db, login_manager
+from extensions import db, login_manager, migrate
 from utils.filters import register_filters
 
 def create_app():
     # Create and configure the app
     app = Flask(__name__)
     app.config.from_object(Config)
-
+    csrf = CSRFProtect(app)
 
     @app.template_filter('format_datetime')
     def format_datetime(value, format='short'):
@@ -21,6 +22,7 @@ def create_app():
     # Initialize extensions
     db.init_app(app)
     login_manager.init_app(app)
+    migrate.init_app(app, db)  # Initialize Flask-Migrate
     
     # Register custom template filters
     register_filters(app)
