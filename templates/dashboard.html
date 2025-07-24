@@ -33,7 +33,7 @@
                             <h6 class="text-uppercase text-muted mb-2">Journal Entries</h6>
                             <h3 class="mb-0">{{ stats.total_journals }}</h3>
                         </div>
-                        <div class="bg-primary bg-opacity-10 p-3 rounded-circle">
+                        <div class="bg-primary bg-opacity-10 p-3 ">
                             <i class="fas fa-book text-primary fa-lg"></i>
                         </div>
                     </div>
@@ -55,7 +55,7 @@
                             <h3 class="mb-0">{{ stats.total_repos }}</h3>
                             <p class="text-muted small mb-0">{{ stats.total_commits }} commits by {{ stats.total_authors }} authors</p>
                         </div>
-                        <div class="bg-success bg-opacity-10 p-3 rounded-circle">
+                        <div class="bg-success bg-opacity-10 p-3 ">
                             <i class="fas fa-code-branch text-success fa-lg"></i>
                         </div>
                     </div>
@@ -75,18 +75,20 @@
                         <div>
                             <h6 class="text-uppercase text-muted mb-2">Wellness Score</h6>
                             <div class="d-flex align-items-center">
-                                <h3 class="mb-0 me-2">8.2</h3>
-                                <span class="badge bg-success">Good <i class="fas fa-arrow-up ms-1"></i></span>
+                                <h3 class="mb-0 me-2">{{ stats.wellness.score }}</h3>
+                                <span class="badge bg-success"> {{stats.wellness.level}}
+                                    <i class="fas fa-arrow-{{ stats.wellness.trend }} ms-1"></i>                                
+                                </span>
                             </div>
                         </div>
-                        <div class="bg-warning bg-opacity-10 p-3 rounded-circle">
+                        <div class="bg-warning bg-opacity-10 p-3 ">
                             <i class="fas fa-heart text-warning fa-lg"></i>
                         </div>
                     </div>
                 </div>
                 <div class="card-footer bg-transparent border-top-0 pt-0">
-                    <a href="#" class="btn btn-sm btn-link ps-0">
-                        View insights <i class="fas fa-arrow-right ms-1"></i>
+                    <a href="{{ url_for('dashboard.wellness_resources') }}" class="btn btn-sm btn-link ps-0">
+                        View Recommendations <i class="fas fa-arrow-right ms-1"></i>
                     </a>
                 </div>
             </div>
@@ -327,64 +329,90 @@
                         <div class="col-md-6">
                             <h6 class="text-uppercase text-muted mb-3">Daily Recommendations</h6>
                             <div class="list-group list-group-flush">
-                                <div class="list-group-item border-0 px-0">
-                                    <div class="d-flex align-items-center">
-                                        <div class="bg-primary bg-opacity-10 p-2 rounded-circle me-3">
-                                            <i class="fas fa-walking text-primary"></i>
-                                        </div>
-                                        <div>
-                                            <p class="mb-0">Take a 5-minute walk outside</p>
-                                            <small class="text-muted">Helps reduce eye strain and improve focus</small>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="list-group-item border-0 px-0">
-                                    <div class="d-flex align-items-center">
-                                        <div class="bg-success bg-opacity-10 p-2 rounded-circle me-3">
-                                            <i class="fas fa-water text-success"></i>
-                                        </div>
-                                        <div>
-                                            <p class="mb-0">Drink some water</p>
-                                            <small class="text-muted">Staying hydrated improves cognitive function</small>
+                                {% if stats.wellness.tips %}
+                                    {% for tip in stats.wellness.tips %}
+                                    <div class="list-group-item border-0 px-0">
+                                        <div class="d-flex align-items-center">
+                                            <div class="flex-shrink-0">
+                                                <div class="bg-{{ 'primary' if tip.priority == 'high' else 'info' }} bg-opacity-10 p-2 me-3">
+                                                    <i class="fas fa-{{ 'exclamation-circle' if tip.priority == 'high' else 'info-circle' }} text-{{ 'primary' if tip.priority == 'high' else 'info' }}"></i>
+                                                </div>
+                                            </div>
+                                            <div class="flex-grow-1">
+                                                <p class="mb-0">{{ tip.text }}</p>
+                                                <small class="text-muted">{{ tip.priority|title }} priority</small>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                                <div class="list-group-item border-0 px-0">
-                                    <div class="d-flex align-items-center">
-                                        <div class="bg-warning bg-opacity-10 p-2 rounded-circle me-3">
-                                            <i class="fas fa-moon text-warning"></i>
-                                        </div>
-                                        <div>
-                                            <p class="mb-0">Plan your next break</p>
-                                            <small class="text-muted">Regular breaks improve productivity</small>
-                                        </div>
+                                    {% endfor %}
+                                {% else %}
+                                    <div class="text-center py-3">
+                                        <p class="text-muted">No recommendations available. Complete your profile for personalized tips.</p>
                                     </div>
-                                </div>
+                                {% endif %}
                             </div>
                         </div>
                         <div class="col-md-6">
-                            <h6 class="text-uppercase text-muted mb-3">Activity Summary</h6>
-                            <div class="row text-center">
-                                <div class="col-4">
-                                    <div class="p-3 rounded-3 bg-light">
-                                        <h3 class="mb-0">4.5</h3>
-                                        <small class="text-muted">Avg. Focus Hours</small>
+                            <h6 class="text-uppercase text-muted mb-3">Wellness Score</h6>
+                            <div class="text-center mb-3">
+                                <div class="position-relative d-inline-block">
+                                    <div class="position-relative">
+                                        <div class="progress-circle" style="--progress: {{ stats.wellness.score * 10 }}">
+                                            <span class="progress-circle-value">{{ "%0.1f"|format(stats.wellness.score) }}</span>
+                                        </div>
                                     </div>
-                                </div>
-                                <div class="col-4">
-                                    <div class="p-3 rounded-3 bg-light">
-                                        <h3 class="mb-0">87%</h3>
-                                        <small class="text-muted">Productivity</small>
-                                    </div>
-                                </div>
-                                <div class="col-4">
-                                    <div class="p-3 rounded-3 bg-light">
-                                        <h3 class="mb-0">6.8</h3>
-                                        <small class="text-muted">Wellness Score</small>
+                                    <div class="mt-2">
+                                        <span class="badge bg-{{ 'success' if stats.wellness.score >= 8 else 'warning' if stats.wellness.score >= 6 else 'danger' }}">
+                                            {{ stats.wellness.level }}
+                                            <i class="fas fa-arrow-{{ stats.wellness.trend }} ms-1"></i>
+                                        </span>
                                     </div>
                                 </div>
                             </div>
-                            <div class="mt-4">
+                            <div class="mb-3">
+                                <h6 class="mb-2">Burnout Risk: 
+                                    <span class="badge bg-{{ 'success' if stats.wellness.burnout_risk.risk_level == 'low' else 'warning' if stats.wellness.burnout_risk.risk_level == 'moderate' else 'danger' }}">
+                                        {{ stats.wellness.burnout_risk.risk_level|title }} ({{ stats.wellness.burnout_risk.risk_score * 100|int }}%)
+                                    </span>
+                                </h6>
+                                <div class="progress" style="height: 10px;">
+                                    <div class="progress-bar bg-{{ 'success' if stats.wellness.burnout_risk.risk_level == 'low' else 'warning' if stats.wellness.burnout_risk.risk_level == 'moderate' else 'danger' }}" 
+                                         role="progressbar" 
+                                         style="width: {{ stats.wellness.burnout_risk.risk_score * 100 }}%" 
+                                         aria-valuenow="{{ stats.wellness.burnout_risk.risk_score * 100 }}" 
+                                         aria-valuemin="0" 
+                                         aria-valuemax="100">
+                                    </div>
+                                </div>
+                                <small class="text-muted">Based on recent activity patterns</small>
+                            </div>
+                            
+                            {% if stats.wellness.burnout_risk.interventions %}
+                                <div class="alert alert-{{ 'warning' if stats.wellness.burnout_risk.risk_level == 'moderate' else 'danger' if stats.wellness.burnout_risk.risk_level == 'high' else 'info' }} py-2 px-3">
+                                    <h6 class="alert-heading">
+                                        <i class="fas fa-{{ 'exclamation-triangle' if stats.wellness.burnout_risk.risk_level == 'high' else 'info-circle' }} me-1"></i>
+                                        {{ stats.wellness.burnout_risk.interventions[0].title }}
+                                    </h6>
+                                    <p class="mb-1 small">{{ stats.wellness.burnout_risk.interventions[0].description }}</p>
+                                </div>
+                            {% endif %}
+                            
+                            <div class="mt-3">
+                                <h6 class="mb-2">Work-Life Balance</h6>
+                                {% if stats.wellness.work_life_tips %}
+                                    <ul class="list-unstyled small">
+                                        {% for tip in stats.wellness.work_life_tips %}
+                                            <li class="mb-2">
+                                                <i class="fas fa-{{ 'check-circle text-success' if tip.priority == 'low' else 'exclamation-circle text-warning' if tip.priority == 'medium' else 'times-circle text-danger' }} me-2"></i>
+                                                {{ tip.suggestion }}
+                                            </li>
+                                        {% endfor %}
+                                    </ul>
+                                {% else %}
+                                    <p class="text-muted small mb-0">Your work-life balance appears to be healthy. Keep it up!</p>
+                                {% endif %}
+                            </div>
+                            <!-- <div class="mt-4">
                                 <div class="d-flex justify-content-between mb-2">
                                     <span>Work-Life Balance</span>
                                     <span>72%</span>
@@ -401,13 +429,13 @@
                                     <div class="progress-bar bg-info" role="progressbar" style="width: 85%;" 
                                          aria-valuenow="85" aria-valuemin="0" aria-valuemax="100"></div>
                                 </div>
-                            </div>
+                            </div> -->
                         </div>
                     </div>
                 </div>
                 <div class="card-footer bg-white border-top-0 pt-0 text-end">
-                    <a href="#" class="btn btn-sm btn-link">
-                        View detailed insights <i class="fas fa-arrow-right ms-1"></i>
+                    <a href="{{ url_for('dashboard.wellness_resources') }}" class="btn btn-sm btn-link ps-0">
+                        View Recommendations <i class="fas fa-arrow-right ms-1"></i>
                     </a>
                 </div>
             </div>
@@ -418,6 +446,34 @@
 
 {% block extra_css %}
 <style>
+    /* Circular progress indicator for wellness score */
+    .progress-circle {
+        --size: 120px;
+        --progress: 82;
+        width: var(--size);
+        height: var(--size);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: 
+            radial-gradient(
+                circle at center, 
+                transparent 0% 60%, 
+                #fff 60% 100%
+            ),
+            conic-gradient(
+                var(--bs-success) 0% calc(var(--progress) * 1%),
+                #e9ecef calc(var(--progress) * 1%) 100%
+            );
+        position: relative;
+    }
+    
+    .progress-circle-value {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--bs-dark);
+    }
     .card {
         border: none;
         box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);

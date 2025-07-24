@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+
+{% block title %}Wellness Resources - DevWell{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1>Wellness Resources</h1>
+                <a href="{{ url_for('dashboard.index') }}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-1"></i> Back to Dashboard
+                </a>
+            </div>
+            
+            <!-- Category Filter -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">Filter by Category</h5>
+                    <div class="btn-group" role="group">
+                        <a href="{{ url_for('dashboard.wellness_resources') }}" 
+                           class="btn btn-outline-primary {{ 'active' if not current_category else '' }}">
+                            All Resources
+                        </a>
+                        {% for cat_id, cat_name in categories %}
+                            <a href="{{ url_for('dashboard.wellness_resources', category=cat_id) }}" 
+                               class="btn btn-outline-primary {{ 'active' if current_category == cat_id else '' }}">
+                                {{ cat_name }}
+                            </a>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Resources List -->
+            <div class="row">
+                {% if resources %}
+                    {% for resource in resources %}
+                        <div class="col-md-6 mb-4">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <h5 class="card-title">{{ resource.title }}</h5>
+                                        <span class="badge bg-info text-dark">{{ resource.duration }}</span>
+                                    </div>
+                                    <p class="card-text">{{ resource.description }}</p>
+                                </div>
+                                <div class="card-footer bg-transparent">
+                                    <a href="{{ resource.url }}" target="_blank" class="btn btn-primary">
+                                        View Resource <i class="fas fa-external-link-alt ms-1"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="col-12">
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>
+                            No resources found for this category.
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+            
+            <!-- Additional Help Section -->
+            <div class="card mt-4">
+                <div class="card-body">
+                    <h5 class="card-title">Need More Help?</h5>
+                    <p class="card-text">
+                        If you're looking for specific wellness resources or have questions about maintaining a healthy work-life balance, 
+                        feel free to reach out to our support team or speak with a wellness professional.
+                    </p>
+                    <a href="mailto:support@devwell.app" class="btn btn-outline-primary">
+                        <i class="fas fa-envelope me-1"></i> Contact Support
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

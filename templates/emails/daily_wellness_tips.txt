@@ -1,0 +1,27 @@
+Your Daily Wellness Tips
+=======================
+
+Hello {{ user.username }},
+
+Here are your personalized wellness tips for {{ date }}. Take a moment to review them and consider how you can incorporate them into your day.
+
+{% for category, tip_list in tips|groupby('category') %}
+{{ category.replace('_', ' ').title() }}
+{{ "-" * category|length }}
+{% for tip in tip_list %}
+- {{ tip.tip }}{% if tip.reason %} ({{ tip.reason }}){% endif %}
+
+{% endfor %}
+{% endfor %}
+
+Remember, small consistent actions lead to big improvements in your overall wellness.
+
+View Your Dashboard: {{ url_for('main.dashboard', _external=True) }}
+
+Wishing you a productive and balanced day,
+The DevWell Team
+
+---
+© {{ now.year }} DevWell. All rights reserved.
+Email Preferences: {{ url_for('main.settings', _external=True) }}
+Unsubscribe: {{ url_for('main.unsubscribe', token=user.get_email_unsubscribe_token(), _external=True) }}

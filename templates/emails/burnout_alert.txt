@@ -1,0 +1,43 @@
+Burnout Risk Alert
+=================
+
+Hello {{ user.username }},
+
+{{ "WARNING: " if risk_level == 'high' else "" }}Our analysis of your recent activity suggests you might be at {{ risk_level.upper() }} RISK of burnout. 
+
+{% if risk_level == 'high' %}
+We strongly encourage you to take immediate action to address this.
+{% elif risk_level == 'moderate' %}
+Consider taking some proactive steps to maintain your wellbeing.
+{% else %}
+Here are some suggestions to help maintain your wellness.
+{% endif %}
+
+RECOMMENDED ACTIONS:
+-------------------
+Based on your activity patterns, we suggest the following interventions:
+
+{% for suggestion in suggestions %}
+* {{ suggestion.title }}: {{ suggestion.description }}
+  {% if suggestion.duration %}
+  Suggested duration: {{ suggestion.duration }}
+  {% endif %}
+
+{% endfor %}
+
+WELLNESS RESOURCES:
+------------------
+* Wellness Resource Center: {{ url_for('main.wellness_resources', _external=True) }}
+* Journal Your Thoughts: {{ url_for('main.journal', _external=True) }}
+* View Your Wellness Dashboard: {{ url_for('main.dashboard', _external=True) }}
+
+Remember, taking care of yourself is not a luxury—it's essential for sustainable productivity and happiness.
+
+Take care,
+The DevWell Team
+
+---
+This is an automated message based on your recent activity.
+© {{ now.year }} DevWell. All rights reserved.
+Email Preferences: {{ url_for('main.settings', _external=True) }}
+Unsubscribe: {{ url_for('main.unsubscribe', token=user.get_email_unsubscribe_token(), _external=True) }}

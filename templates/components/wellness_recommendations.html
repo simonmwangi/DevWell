@@ -1,0 +1,141 @@
+{# Wellness Recommendations Component
+   Include this component in journal and repository views to show contextual wellness tips.
+   
+   Parameters:
+   - context: The context in which the recommendations are shown ('journal', 'repository', or 'dashboard')
+   - user: The current user object
+   - additional_data: Any additional data needed for recommendations (e.g., journal entry, repo stats)
+#}
+
+{% from 'macros/wellness_icons.html' import wellness_icon %}
+<div class="card mb-4">
+    <div class="card-header bg-light">
+        <h5 class="mb-0">
+            {{ wellness_icon('recommendation') }}
+            Wellness Tips for You
+        </h5>
+    </div>
+    <div class="card-body p-0">
+        <div class="list-group list-group-flush">
+            {% if context == 'journal' %}
+                {# Journal-specific recommendations #}
+                {% if additional_data.sentiment < -0.3 %}
+                    <div class="list-group-item">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h6 class="mb-1">Consider a Break</h6>
+                            <small class="text-muted">Just now</small>
+                        </div>
+                        <p class="mb-1">Your recent journal entry shows some stress. Try taking a short walk or practicing deep breathing.</p>
+                        <small>
+                            <a href="{{ url_for('dashboard.wellness_resources') }}?category=stress_relief">View stress relief resources</a>
+                        </small>
+                    </div>
+                {% endif %}
+                
+                {% if additional_data.entry_length > 500 %}
+                    <div class="list-group-item">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h6 class="mb-1">Great Reflection!</h6>
+                            <small class="text-muted">Just now</small>
+                        </div>
+                        <p class="mb-1">You've written a detailed journal entry. Consider reviewing your past entries to spot patterns in your mood and productivity.</p>
+                    </div>
+                {% endif %}
+                
+                {% if additional_data.last_entry_days_ago > 3 %}
+                    <div class="list-group-item">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h6 class="mb-1">Journaling Reminder</h6>
+                            <small class="text-muted">Just now</small>
+                        </div>
+                        <p class="mb-1">It's been a few days since your last entry. Regular journaling can help with stress management and self-reflection.</p>
+                    </div>
+                {% endif %}
+                
+            {% elif context == 'repository' %}
+                {# Repository-specific recommendations #}
+                {% set commit_hour = additional_data.get('commit_hour_avg', 0) %}
+                {% set commit_frequency = additional_data.get('commit_frequency', 0) %}
+                {% set last_commit_days = additional_data.get('last_commit_days_ago', 0) %}
+                
+                {% if commit_hour >= 20 or commit_hour <= 6 %}
+                    <div class="list-group-item">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h6 class="mb-1">Late Night Coding</h6>
+                            <small class="text-muted">Just now</small>
+                        </div>
+                        <p class="mb-1">You've been committing code late at night. Consider establishing a regular sleep schedule for better productivity.</p>
+                        <small>
+                            <a href="{{ url_for('dashboard.wellness_resources') }}?category=sleep">View sleep resources</a>
+                        </small>
+                    </div>
+                {% endif %}
+                
+                {% if commit_frequency > 20 %}
+                    <div class="list-group-item">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h6 class="mb-1">Active Development</h6>
+                            <small class="text-muted">Just now</small>
+                        </div>
+                        <p class="mb-1">You're making frequent commits, which is great! Remember to take regular breaks to maintain focus and prevent burnout.</p>
+                        <small>
+                            <a href="{{ url_for('dashboard.wellness_resources') }}?category=productivity">View productivity tips</a>
+                        </small>
+                    </div>
+                {% elif commit_frequency > 0 and commit_frequency < 3 %}
+                    <div class="list-group-item">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h6 class="mb-1">Consistent Commits</h6>
+                            <small class="text-muted">Just now</small>
+                        </div>
+                        <p class="mb-1">Consider committing your work more frequently. Smaller, more frequent commits can make code reviews easier and help track progress.</p>
+                    </div>
+                {% endif %}
+                
+                {% if last_commit_days > 7 %}
+                    <div class="list-group-item">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h6 class="mb-1">Welcome Back!</h6>
+                            <small class="text-muted">Just now</small>
+                        </div>
+                        <p class="mb-1">It's been a while since your last commit. Would you like to review recent changes or set some goals for this project?</p>
+                    </div>
+                {% endif %}
+                
+                
+                {% if additional_data.commit_frequency > 20 %}
+                    <div class="list-group-item">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h6 class="mb-1">High Activity Level</h6>
+                            <small class="text-muted">Just now</small>
+                        </div>
+                        <p class="mb-1">You've been very active in this repository. Remember to take regular breaks to avoid burnout.</p>
+                        <small>
+                            <a href="{{ url_for('dashboard.wellness_resources') }}?category=breaks">View break techniques</a>
+                        </small>
+                    </div>
+                {% endif %}
+                
+            {% else %}
+                {# Default/general recommendations #}
+                <div class="list-group-item">
+                    <div class="d-flex w-100 justify-content-between">
+                        <h6 class="mb-1">Daily Wellness Tip</h6>
+                        <small class="text-muted">Just now</small>
+                    </div>
+                    <p class="mb-1">Take a moment to stretch and rest your eyes. The 20-20-20 rule can help reduce eye strain.</p>
+                    <small>
+                        <a href="{{ url_for('dashboard.wellness_resources') }}?category=eye_health">Learn more about eye health</a>
+                    </small>
+                </div>
+            {% endif %}
+            
+            {# Always show a link to more wellness resources #}
+            <div class="list-group-item text-center">
+                <a href="{{ url_for('dashboard.wellness_resources') }}" class="btn btn-outline-primary btn-sm">
+                    View More Wellness Resources
+                </a>
+            </div>
+        </div>
+    </div>
+</div>

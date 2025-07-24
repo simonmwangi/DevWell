@@ -190,6 +190,17 @@
         
         <!-- Sidebar -->
         <div class="col-lg-4">
+            <!-- Wellness Recommendations -->
+            {% with context='journal',
+                    additional_data={
+                        'sentiment': sentiment_stats.avg_sentiment if sentiment_stats else 0,
+                        'entry_length': avg_entry_length,
+                        'last_entry_days_ago': last_entry_days_ago if last_entry_days_ago is not none else 999
+                    }
+            %}
+                {% include 'components/wellness_recommendations.html' %}
+            {% endwith %}
+            
             <!-- Search Widget -->
             <div class="card mb-4">
                 <div class="card-body">

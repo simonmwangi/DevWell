@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% from 'macros/wellness_icons.html' import wellness_icon %}
 
 {% block title %}{{ repository.name }} - DevWell{% endblock %}
 
@@ -129,43 +130,45 @@
         <!-- Commits Tab -->
         <div class="tab-pane fade show active" id="commits" role="tabpanel" aria-labelledby="commits-tab">
             <div class="card">
-                <div class="card-body">
-                    {% if repository.commits.count() > 0 %}
-                        <div class="table-responsive">
-                            <table class="table table-hover">
-                                <thead>
-                                    <tr>
-                                        <th>Message</th>
-                                        <th>Author</th>
-                                        <th>Date</th>
-                                        <th class="text-end">Changes</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for commit in repository.commits.order_by(Commit.timestamp.desc()).all() %}
+                <div class="card-body p-0">
+                    <div style="max-height: 600px; overflow-y: auto;">
+                        {% if repository.commits.count() > 0 %}
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
                                         <tr>
-                                            <td>
-                                                <a href="#" class="text-decoration-none">
-                                                    {{ commit.message|truncate(60) }}
-                                                </a>
-                                                <div class="text-muted small">
-                                                    {{ commit.commit_hash[:7] }}
-                                                </div>
-                                            </td>
-                                            <td>{{ commit.author_name }}</td>
-                                            <td>{{ commit.timestamp|format_datetime('short') }}</td>
-                                            <td class="text-end">
-                                                {% if commit.lines_added > 0 %}
-                                                    <span class="badge bg-success me-1">+{{ commit.lines_added }}</span>
-                                                {% endif %}
-                                                {% if commit.lines_removed > 0 %}
-                                                    <span class="badge bg-danger">-{{ commit.lines_removed }}</span>
-                                                {% endif %}
-                                            </td>
+                                            <th>Message</th>
+                                            <th>Author</th>
+                                            <th>Date</th>
+                                            <th class="text-end">Changes</th>
                                         </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
+                                    </thead>
+                                    <tbody>
+                                        {% for commit in repository.commits.order_by(Commit.timestamp.desc()).all() %}
+                                            <tr>
+                                                <td>
+                                                    <a href="#" class="text-decoration-none">
+                                                        {{ commit.message|truncate(60) }}
+                                                    </a>
+                                                    <div class="text-muted small">
+                                                        {{ commit.commit_hash[:7] }}
+                                                    </div>
+                                                </td>
+                                                <td>{{ commit.author_name }}</td>
+                                                <td>{{ commit.timestamp|format_datetime('short') }}</td>
+                                                <td class="text-end">
+                                                    {% if commit.lines_added > 0 %}
+                                                        <span class="badge bg-success me-1">+{{ commit.lines_added }}</span>
+                                                    {% endif %}
+                                                    {% if commit.lines_removed > 0 %}
+                                                        <span class="badge bg-danger">-{{ commit.lines_removed }}</span>
+                                                    {% endif %}
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     {% else %}
                         <div class="text-center py-5">
@@ -184,7 +187,7 @@
         </div>
         
         <!-- Activity Tab -->
-        <div class="tab-pane fade show active" id="activity" role="tabpanel" aria-labelledby="activity-tab">
+        <div class="tab-pane fade" id="activity" role="tabpanel" aria-labelledby="activity-tab">
             {% if not analysis %}
             <div class="alert alert-info">
                 <i class="fas fa-info-circle me-2"></i>

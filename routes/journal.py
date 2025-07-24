@@ -4,6 +4,7 @@ from models.journal import JournalEntry
 from app import db
 from ai_services.sentiment_analyzer import analyze_sentiment
 from forms import JournalEntryForm
+from datetime import datetime
 
 # Create blueprint
 journal_bp = Blueprint('journal', __name__)
@@ -36,6 +37,22 @@ def index():
     
     # Convert to dictionary for easier access in template
     sentiment_dict = {label: count for label, count in sentiment_counts}
+
+    # --- New aggregated stats for wellness recommendations ---
+    sentiment_stats = db.session.query(
+        db.func.avg(JournalEntry.sentiment_score).label('avg_sentiment'),
+        db.func.avg(db.func.length(JournalEntry.content)).label('avg_length')
+    ).filter_by(user_id=current_user.id).first()
+
+    last_entry = JournalEntry.query.filter_by(user_id=current_user.id)\
+        .order_by(JournalEntry.created_at.desc()).first()
+    last_entry_days_ago = (
+        (datetime.utcnow() - last_entry.created_at).days if last_entry else None
+    )
+
+    avg_entry_length = (
+        float(sentiment_stats.avg_length) if sentiment_stats and sentiment_stats.avg_length else 0
+    )
     
     return render_template(
         'journal.html',
@@ -45,7 +62,10 @@ def index():
             'neutral': sentiment_dict.get('neutral', 0),
             'negative': sentiment_dict.get('negative', 0)
         },
-        current_sentiment=sentiment_filter
+        current_sentiment=sentiment_filter,
+        sentiment_stats=sentiment_stats,
+        avg_entry_length=avg_entry_length,
+        last_entry_days_ago=last_entry_days_ago
     )
 
 @journal_bp.route('/entry/<int:entry_id>')

@@ -133,6 +133,15 @@ def view_repository(repo_id):
             'risk_score': (burnout.get('burnout_risk', 0) * 100) if 'burnout_risk' in burnout else 0
         }
     
+    now = datetime.utcnow()
+    
+    # Prepare wellness recommendation data
+    wellness_context = {
+        'commit_hour_avg': analysis_data.get('commit_patterns', {}).get('average_commit_hour', 12),  # Default to noon if not available
+        'commit_frequency': analysis_data.get('commit_patterns', {}).get('commit_frequency', 0),
+        'last_commit_days_ago': (now - (repository.last_commit_date or now)).days
+    }
+
     return render_template(
         'repository_view.html',
         repository=repository,
@@ -142,7 +151,9 @@ def view_repository(repo_id):
         chart_data=chart_data,
         Commit=Commit,
         form=RepositoryForm(current_user=current_user),
-        last_analyzed=repository.last_analyzed
+        last_analyzed=repository.last_analyzed,
+        now=now,
+        wellness_context=wellness_context
     )
 
 def analyze_repository_commits(repo_id, git_repo):

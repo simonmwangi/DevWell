@@ -1,0 +1,17 @@
+{# Wellness Icons Macro - Simplified version #}
+
+{% macro wellness_icon(name, size='1em', class='') %}
+    {% if name == 'recommendation' %}
+        <i class="bi bi-lightbulb {{ class }}" style="font-size: {{ size }};"></i>
+    {% elif name == 'stress' %}
+        <i class="bi bi-emoji-frown {{ class }}" style="font-size: {{ size }};"></i>
+    {% elif name == 'sleep' %}
+        <i class="bi bi-moon-stars {{ class }}" style="font-size: {{ size }};"></i>
+    {% elif name == 'exercise' %}
+        <i class="bi bi-activity {{ class }}" style="font-size: {{ size }};"></i>
+    {% elif name == 'break' %}
+        <i class="bi bi-cup-hot {{ class }}" style="font-size: {{ size }};"></i>
+    {% else %}
+        <i class="bi bi-info-circle {{ class }}" style="font-size: {{ size }};"></i>
+    {% endif %}
+{% endmacro %}

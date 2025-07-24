@@ -1,0 +1,70 @@
+{% extends "emails/base.html" %}
+
+{% block title %}Burnout Risk Alert - DevWell{% endblock %}
+
+{% block content %}
+    <h2>Burnout Risk Alert</h2>
+    <p>Hello {{ user.username }},</p>
+    
+    <div class="content-box" style="background-color: #fff8f8; border-left: 4px solid #ff5252; padding: 15px; margin: 20px 0; border-radius: 0 4px 4px 0;">
+        <h3 style="margin-top: 0; color: #c62828;">
+            {% if risk_level == 'high' %}
+                <span class="risk-level risk-high">High Risk of Burnout</span>
+            {% elif risk_level == 'moderate' %}
+                <span class="risk-level risk-moderate">Moderate Risk of Burnout</span>
+            {% else %}
+                <span class="risk-level risk-low">Wellness Check</span>
+            {% endif %}
+        </h3>
+        
+        <p>
+            Our analysis of your recent activity suggests you might be at 
+            <strong>{{ risk_level }} risk</strong> of burnout. 
+            {% if risk_level == 'high' %}
+                We strongly encourage you to take immediate action to address this.
+            {% elif risk_level == 'moderate' %}
+                Consider taking some proactive steps to maintain your wellbeing.
+            {% else %}
+                Here are some suggestions to help maintain your wellness.
+            {% endif %}
+        </p>
+    </div>
+    
+    <h3>Recommended Actions</h3>
+    <p>Based on your activity patterns, we suggest the following interventions:</p>
+    
+    <ul style="padding-left: 20px;">
+        {% for suggestion in suggestions %}
+            <li style="margin-bottom: 10px;">
+                <strong>{{ suggestion.title }}:</strong> {{ suggestion.description }}
+                {% if suggestion.duration %}
+                    <br><span style="font-size: 0.9em; color: #666;">Suggested duration: {{ suggestion.duration }}</span>
+                {% endif %}
+            </li>
+        {% endfor %}
+    </ul>
+    
+    <div style="background-color: #f0f7ff; padding: 15px; border-radius: 4px; margin: 20px 0;">
+        <h3 style="margin-top: 0; color: #1976d2;">Wellness Resources</h3>
+        <p>Consider exploring these additional resources:</p>
+        <ul>
+            <li><a href="{{ url_for('main.wellness_resources', _external=True) }}" style="color: #1976d2; text-decoration: none;">Wellness Resource Center</a></li>
+            <li><a href="{{ url_for('main.journal', _external=True) }}" style="color: #1976d2; text-decoration: none;">Journal Your Thoughts</a></li>
+            <li><a href="{{ url_for('main.dashboard', _external=True) }}" style="color: #1976d2; text-decoration: none;">View Your Wellness Dashboard</a></li>
+        </ul>
+    </div>
+    
+    <div style="text-align: center; margin: 30px 0;">
+        <a href="{{ url_for('main.dashboard', _external=True) }}" class="button">
+            View Your Wellness Dashboard
+        </a>
+    </div>
+    
+    <p>Remember, taking care of yourself is not a luxury—it's essential for sustainable productivity and happiness.</p>
+    
+    <p>Take care,<br>The DevWell Team</p>
+    
+    <p style="font-size: 0.9em; color: #777; margin-top: 30px; border-top: 1px solid #eee; padding-top: 15px;">
+        <em>This is an automated message based on your recent activity. If you believe this alert was sent in error, please update your preferences in your account settings.</em>
+    </p>
+{% endblock %}
