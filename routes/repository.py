@@ -17,7 +17,7 @@ repo_bp = Blueprint('repository', __name__)
 @login_required
 def index():
     repositories = Repository.query.filter_by(user_id=current_user.id).all()
-    return render_template('repository_list.html', repositories=repositories, csrf_token=generate_csrf())
+    return render_template('repository_list.html', repositories=repositories)
 
 @repo_bp.route('/add', methods=['GET', 'POST'])
 @login_required

@@ -40,11 +40,13 @@ def create_app():
     from routes.dashboard import dashboard_bp
     from routes.journal import journal_bp
     from routes.repository import repo_bp as repository_bp
+    from routes.assistant import assistant_bp
 
     app.register_blueprint(auth_bp, url_prefix='/')
     app.register_blueprint(dashboard_bp, url_prefix='/')
     app.register_blueprint(journal_bp, url_prefix='/journal')
     app.register_blueprint(repository_bp, url_prefix='/repository')
+    app.register_blueprint(assistant_bp)  # already has /assistant prefix
 
     # Create database tables
     with app.app_context():

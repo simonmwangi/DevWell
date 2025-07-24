@@ -1,0 +1,76 @@
+/* assistant_chat.css */
+#assistant-toggle {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 1050;
+  background-color: #0d6efd;
+  border: none;
+  color: #fff;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+}
+
+#assistant-chat-box {
+  position: fixed;
+  bottom: 80px;
+  right: 20px;
+  width: 320px;
+  max-height: 450px;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  display: none;
+  flex-direction: column;
+  z-index: 1050;
+}
+#assistant-chat-box.open { display: flex; }
+
+#assistant-header {
+  background: #0d6efd;
+  color: #fff;
+  padding: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
+}
+#assistant-header button { background:none;border:none;color:#fff;font-size:1.25rem; }
+
+#assistant-messages {
+  padding: 10px;
+  overflow-y: auto;
+  flex: 1;
+}
+.assistant-msg { margin-bottom: 8px; padding:6px 8px; border-radius:4px; font-size:0.9rem; }
+
+#assistant-form {
+  display: flex;
+  border-top: 1px solid #dee2e6;
+}
+#assistant-input { flex:1; border:none; padding:8px 10px; }
+#assistant-input:focus { outline:none; }
+#assistant-form button { background:none; border:none; padding:8px 12px; color:#0d6efd; font-size:1.2rem; }
+
+.assistant-msg.bot {
+  background: #f0f4ff;
+  border-left: 4px solid #0d6efd;
+  padding: 10px 12px;
+  border-radius: 6px;
+  font-size: 0.92rem;
+  white-space: pre-wrap;
+}
+.assistant-msg.user {
+  background: #e9f3ff;
+  padding: 8px 12px;
+  border-radius: 6px;
+  align-self: flex-end;
+  font-weight: 500;
+}

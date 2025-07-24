@@ -2,6 +2,7 @@ from flask import Blueprint, render_template, jsonify, current_app, request
 from flask_login import login_required, current_user
 from models.journal import JournalEntry
 from models.repository import Repository, Commit
+from models.wellness_snapshot import WellnessSnapshot
 from datetime import datetime, timedelta
 from sqlalchemy import func
 import json
@@ -183,7 +184,6 @@ def index():
         'work_life_balance_score': 0.6  # Should be calculated from work patterns
     })
     
-    print(git_data)
     # Analyze burnout risk
     burnout_analysis = recommender.analyze_burnout_risk(git_data, journal_data)
     
@@ -193,6 +193,32 @@ def index():
     # Calculate wellness score (0-10 scale)
     wellness_score = max(0, min(10, 8 - (burnout_analysis['risk_score'] * 5)))
     
+    # Persist / update today's wellness snapshot
+    today = datetime.utcnow().date()
+    snap = WellnessSnapshot.query.filter_by(user_id=current_user.id, snapshot_date=today).first()
+    if not snap:
+        snap = WellnessSnapshot(user_id=current_user.id, snapshot_date=today)
+
+    # update fields
+    snap.weekly_hours = git_data['weekly_hours']
+    snap.avg_daily_commits = git_data['avg_daily_commits']
+    snap.schedule_regularity = git_data['schedule_regularity']
+    snap.collaboration_score = git_data['collaboration_score']
+    snap.late_night_commits = git_data['late_night_commits']
+    snap.weekend_commit_ratio = git_data['weekend_commit_ratio']
+    snap.max_commit_streak_hours = git_data['max_commit_streak_hours']
+
+    snap.avg_sentiment = journal_data['avg_sentiment']
+    snap.entry_count = journal_data['entry_count']
+    snap.days_since_last_journal = journal_data['days_since_last_journal']
+
+    snap.wellness_score = wellness_score
+    snap.burnout_risk = burnout_analysis['risk_score'] if isinstance(burnout_analysis, dict) else 0
+
+    from extensions import db
+    db.session.add(snap)
+    db.session.commit()
+
     # Get statistics
     stats = {
         'total_journals': JournalEntry.query.filter_by(user_id=current_user.id).count(),
