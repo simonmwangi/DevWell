@@ -3,6 +3,8 @@
 ## 🌟 Project Overview
 DevWell is an intelligent developer wellness platform that combines AI/ML with software development analytics to promote sustainable development practices and developer well-being. The platform analyzes development patterns through their Git repositories, provides wellness recommendations, and helps developers maintain a healthy work-life balance while being productive.
 
+[DevWell Website](http://devwell.unicodeonesolutions.com)
+
 ## 🎯 Sustainable Development Goals (SDGs) Addressed
 
 ### 🎯 SDG 3: Good Health and Well-being
