@@ -7,6 +7,10 @@ from forms import LoginForm, RegistrationForm
 # Create blueprint
 auth_bp = Blueprint('auth', __name__)
 
+@auth_bp.route('/')
+def home():
+    return render_template('landing.html')
+    
 @auth_bp.route('/login', methods=['GET', 'POST'])
 def login():
     if current_user.is_authenticated:

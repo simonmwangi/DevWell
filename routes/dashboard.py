@@ -14,7 +14,7 @@ from ai_services.wellness_recommender import WellnessRecommender
 # Create blueprint
 dashboard_bp = Blueprint('dashboard', __name__)
 
-@dashboard_bp.route('/')
+@dashboard_bp.route('/dashboard')
 @login_required
 def index():
     # Get recent journal entries

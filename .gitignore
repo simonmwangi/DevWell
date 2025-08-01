@@ -5,3 +5,4 @@ instance
 static/uploads/*
 migrations
 vector_stores
+devwell.db

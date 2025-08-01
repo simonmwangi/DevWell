@@ -16,16 +16,48 @@
     
     <!-- Custom CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/assistant_chat.css') }}">
+    <style>
+        :root {
+            --bs-primary: #4361ee;
+            --bs-secondary: #3f37c9;
+            --bs-accent: #4cc9f0;
+            --bs-dark: #1a1a2e;
+            --bs-light: #f8f9fa;
+        }
+        
+        /* Make the html and body elements take full height */
+        html, body {
+            height: 100%;
+            margin: 0;
+        }
+        
+        /* Create a flex container for the body */
+        body {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        
+        /* Make the main content grow to fill available space */
+        main {
+            flex: 1 0 auto;
+            width: 100%;
+        }
+        
+        /* Style the footer */
+        footer {
+            flex-shrink: 0;
+            width: 100%;
+        }
+    </style>
     {% block extra_css %}{% endblock %}
 </head>
 <body>
     <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <nav class="navbar navbar-expand-lg" style="background-color: var(--bs-primary)">
         <div class="container">
-            <a class="navbar-brand" href="{{ url_for('dashboard.index') }}">
-                <i class="fas fa-code me-2"></i>DevWell
-            </a>
+            <a class="navbar-brand" href="{{ url_for('auth.home') }}">Dev<span style="color: var(--bs-accent)">Well</span></a>
+
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
@@ -105,9 +137,7 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     
     <!-- Custom JS -->
-    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/assistant_chat.js') }}"></script>
-    
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>    
     {% block extra_js %}{% endblock %}
 </body>
 </html>

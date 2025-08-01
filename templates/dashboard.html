@@ -3,6 +3,7 @@
 {% block title %}Dashboard - DevWell{% endblock %}
 
 {% block content %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/assistant_chat.css') }}">
 <div class="container-fluid">
     <!-- Welcome Banner -->
     <div class="row mb-4">
@@ -505,6 +506,7 @@
 {% endblock %}
 
 {% block extra_js %}
+<script src="{{ url_for('static', filename='js/assistant_chat.js') }}"></script>
 <script>
     // Initialize tooltips
     document.addEventListener('DOMContentLoaded', function() {
