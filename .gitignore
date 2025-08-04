@@ -1,8 +1,9 @@
 __pycache__
-.env
+*.env
 instance
 .venv
 static/uploads/*
 migrations
 vector_stores
 devwell.db
+devwell.db-journal
