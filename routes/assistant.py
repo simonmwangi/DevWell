@@ -2,8 +2,8 @@ from flask import Blueprint, request, jsonify
 from flask_login import login_required, current_user
 # from langchain.chat_models import ChatOpenAI
 from langchain_google_genai import ChatGoogleGenerativeAI
-from langchain.embeddings import SentenceTransformerEmbeddings
-from langchain.vectorstores import Chroma
+#from langchain_community.embeddings import SentenceTransformerEmbeddings
+from langchain_community.vectorstores import Chroma
 from langchain.schema import Document
 from langchain.chains import RetrievalQA
 from langchain.prompts import PromptTemplate
@@ -13,6 +13,7 @@ from models.repository import Commit, Repository
 from models.wellness_snapshot import WellnessSnapshot
 from datetime import datetime, timedelta
 import os
+from extensions import get_embeddings_model, cache
 
 assistant_bp = Blueprint('assistant', __name__, url_prefix='/assistant')
 
@@ -23,7 +24,7 @@ def _get_vectordb(user_id: int):
     """Return (or create) the Chroma vector store for the user."""
     user_dir = os.path.join(VECTOR_DIR, str(user_id))
     os.makedirs(user_dir, exist_ok=True)
-    embeddings = SentenceTransformerEmbeddings(model_name="all-MiniLM-L6-v2")
+    embeddings = cache.get('embeddings_model') or get_embeddings_model()
     return Chroma(persist_directory=user_dir, embedding_function=embeddings)
 
 def _build_documents(user_id: int):

@@ -2,17 +2,20 @@ from flask import Flask
 from flask_wtf import CSRFProtect
 import os
 from config import Config
-from extensions import db, login_manager, migrate
+from extensions import db, login_manager, migrate, cache, mail
 from utils.filters import register_filters
-from extensions import mail
+from flask_compress import Compress
 
+compress = Compress()
 
 def create_app():
     # Create and configure the app
     app = Flask(__name__)
+    compress.init_app(app)
     app.config.from_object(Config)
     csrf = CSRFProtect(app)
     mail.init_app(app)
+    cache.init_app(app)
 
     @app.template_filter("format_datetime")
     def format_datetime(value, format="short"):
