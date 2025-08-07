@@ -373,7 +373,7 @@
                             <div class="mb-3">
                                 <h6 class="mb-2">Burnout Risk: 
                                     <span class="badge bg-{{ 'success' if stats.wellness.burnout_risk.risk_level == 'low' else 'warning' if stats.wellness.burnout_risk.risk_level == 'moderate' else 'danger' }}">
-                                        {{ stats.wellness.burnout_risk.risk_level|title }} ({{ stats.wellness.burnout_risk.risk_score * 100|int }}%)
+                                        {{ stats.wellness.burnout_risk.risk_level|title }} ({{ (stats.wellness.burnout_risk.risk_score * 100)|round(0)|int }}%)
                                     </span>
                                 </h6>
                                 <div class="progress" style="height: 10px;">

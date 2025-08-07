@@ -167,6 +167,9 @@ def analyze_repository_commits(repo_id, git_repo):
             if commit.hexsha in existing_hashes:
                 continue
                 
+            if commit.author.email != current_user.email:
+                continue
+             
             # Count added and removed lines
             stats = commit.stats.total
             
