@@ -18,8 +18,9 @@
     <div class="card-body p-0">
         <div class="list-group list-group-flush">
             {% if context == 'journal' %}
+            <h1>{{ additional_data}}</h1>
                 {# Journal-specific recommendations #}
-                {% if additional_data.sentiment < -0.3 %}
+                {% if additional_data.sentiment is not none and additional_data.sentiment < -0.03 %}
                     <div class="list-group-item">
                         <div class="d-flex w-100 justify-content-between">
                             <h6 class="mb-1">Consider a Break</h6>
@@ -32,7 +33,7 @@
                     </div>
                 {% endif %}
                 
-                {% if additional_data.entry_length > 500 %}
+                {% if additional_data.entry_length is not none and additional_data.entry_length > 500 %}
                     <div class="list-group-item">
                         <div class="d-flex w-100 justify-content-between">
                             <h6 class="mb-1">Great Reflection!</h6>
@@ -42,7 +43,7 @@
                     </div>
                 {% endif %}
                 
-                {% if additional_data.last_entry_days_ago > 3 %}
+                {% if additional_data.last_entry_days_ago is not none and additional_data.last_entry_days_ago > 3 %}
                     <div class="list-group-item">
                         <div class="d-flex w-100 justify-content-between">
                             <h6 class="mb-1">Journaling Reminder</h6>
