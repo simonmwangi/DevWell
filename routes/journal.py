@@ -2,7 +2,7 @@ from flask import Blueprint, render_template, redirect, url_for, flash, request
 from flask_login import login_required, current_user
 from models.journal import JournalEntry
 from app import db
-from ai_services.sentiment_analyzer import analyze_sentiment
+from ai_services.sentiment_analyzer import analyze_sentiment_with_api
 from forms import JournalEntryForm
 from datetime import datetime
 
@@ -85,7 +85,7 @@ def new_entry():
     
     if form.validate_on_submit():
         # Analyze sentiment
-        sentiment = analyze_sentiment(form.content.data)
+        sentiment = analyze_sentiment_with_api(form.content.data)
         
         entry = JournalEntry(
             title=form.title.data,
@@ -119,7 +119,7 @@ def edit_entry(entry_id):
         
         # Re-analyze sentiment if content changed
         if entry.content != request.form.get('content'):
-            sentiment = analyze_sentiment(entry.content)
+            sentiment = analyze_sentiment_with_api(entry.content)
             entry.sentiment_score = sentiment['score']
             entry.sentiment_label = sentiment['label']
         

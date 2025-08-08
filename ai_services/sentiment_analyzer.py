@@ -2,7 +2,50 @@ from textblob import TextBlob
 from transformers import pipeline
 import torch
 import os
-from config import Config
+import json
+import requests
+# from config import Config
+
+
+def analyze_sentiment_with_api(text):
+    api_url = os.getenv("SENTIMENT_ANALYSIS_URL")
+    api_key = os.getenv("SENTIMENT_ANALYSIS_API_KEY")
+    
+    payload = json.dumps({"text": text})
+    headers = {'Content-Type': 'application/json'}
+    
+    if api_key:
+        headers['x-api-key'] = api_key
+
+    try:
+        response = requests.post(api_url, headers=headers, data=payload, timeout=5)
+
+        if response.status_code == 200:
+            return response.json()
+        else:
+            print(f"API error {response.status_code}: {response.text}")
+    except requests.RequestException as e:
+        print(f"Request failed: {e}")
+
+    # Fallback using TextBlob
+    blob = TextBlob(text)
+    polarity = blob.sentiment.polarity
+
+    if polarity > 0.2:
+        label = 'positive'
+    elif polarity < -0.2:
+        label = 'negative'
+    else:
+        label = 'neutral'
+
+    return {
+        'score': float(polarity),
+        'label': label,
+        'polarity': float(polarity),
+        'transformer_score': None,
+        'transformer_label': None,
+        'fallback': True
+    }
 
 def analyze_sentiment(text):
     """
@@ -34,7 +77,8 @@ def analyze_sentiment(text):
         # Initialize sentiment analysis pipeline
         sentiment_pipeline = pipeline(
             "sentiment-analysis",
-            model="distilbert-base-uncased-finetuned-sst-2-english",
+            # model="distilbert-base-uncased-finetuned-sst-2-english",
+            model="prajjwal1/bert-tiny",
             device=device
         )
         
@@ -74,3 +118,6 @@ def analyze_sentiment(text):
             'transformer_score': None,
             'transformer_label': None
         }
+
+if __name__ == "__main__":
+   print(analyze_sentiment_with_api("I absolutely love this product!"))
